@@ -1,0 +1,1 @@
+This directory contains GRDC daily river discharge data from all sub regions in the West Africa domain. Data downloaded from [GRDC Data Portal](https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/Subregions) .
