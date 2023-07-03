@@ -1,0 +1,37 @@
+# Title:                 GRDC STATION DATA FILE
+#                        --------------
+# Format:                DOS-ASCII
+# Field delimiter:       ;
+# missing values are indicated by -999.000
+#
+# file generation date:  2023-06-30
+#
+# GRDC-No.:              1749550
+# River:                 CHINKO
+# Station:               RAFAI
+# Country:               CF
+# Latitude (DD):       4.96666666666667
+# Longitude (DD):      23.9166666666667
+# Catchment area (km²):      52500.0
+# Altitude (m ASL):        507.4
+# Next downstream station:      1749500
+# Remarks:               
+# Owner of original data: Central African Republic - Direction de la Meteorologie et l'Hydrologie
+#************************************************************
+#
+# Data Set Content:      MEAN DAILY DISCHARGE (Q)
+#                        --------------------
+# Unit of measure:                  m³/s
+# Time series:            - 
+# No. of years:          
+# Last update:           2018-05-23
+#
+# Table Header:
+#     YYYY-MM-DD - Date
+#     hh:mm      - Time
+#     Value   - original (provided) data
+#************************************************************
+#
+# Data lines: 0
+# DATA
+YYYY-MM-DD;hh:mm; Value
