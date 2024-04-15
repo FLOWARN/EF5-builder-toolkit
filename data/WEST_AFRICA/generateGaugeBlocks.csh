@@ -20,5 +20,6 @@ end
 # Now Basin block
 echo "[Basin 0]" >> gauges_blocks_trl.txt
 foreach line (`seq 2 1 $nFileLines`)
+	set station=`sed -n ${line}p ${locations} | cut -d "," -f3 | tr -d '["]'`
         echo "gauge=${station}" >> gauges_blocks_ctrl.txt
 end
