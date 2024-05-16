@@ -1,7 +1,0 @@
-#!/bin/sh
-# This is an example script showing how to specify qsub options
-#$ -o ef5_out90.txt
-#$ -q IFC
-#$ -cwd
-ef5 control_gauges_ghana.txt
-
