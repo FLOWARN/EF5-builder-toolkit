@@ -61,6 +61,9 @@ def calcular_metricas_error(df_simulado, df_observado):
     return rmse, bias, nse
 
 def plotting(Q_daily_df, Q_obs, nse, bias, rmse):
+    if not os.path.exists(path_data+"plots/"):
+        os.makedirs(path_data+"plots/")
+        
     fig = plt.subplots(figsize=(16, 5))
     plt.scatter(Q_obs.index, Q_obs['discharge'], color = 'black', label='Observed')
     plt.plot(Q_daily_df.index, Q_daily_df['Discharge(m^3 s^-1)'], color = 'blue', label='Simulated', linewidth=4)
@@ -88,12 +91,11 @@ def plotting(Q_daily_df, Q_obs, nse, bias, rmse):
     ax.xaxis.set_major_locator(AutoDateLocator(minticks=10, maxticks=20))
     ax.xaxis.set_major_formatter(DateFormatter('%Y-%m'))
     #plt.show()
-    plt.savefig(path_plots+file[len(prefix)+3:-10]+'.png',bbox_inches='tight')
+    plt.savefig(path_data+"plots/"+file[len(prefix)+3:-10]+'.png',bbox_inches='tight')
 
 #%%
 #read all the files
-path_data= '/Users/vrobledodelgado/Library/CloudStorage/OneDrive-UniversityofIowa/PhD/SERVIR_PROJECT/GHANA/Calibration/OUTPUTS_90m/baseline2/outputs/'
-path_plots = '/Users/vrobledodelgado/Library/CloudStorage/OneDrive-UniversityofIowa/PhD/SERVIR_PROJECT/GHANA/Calibration/OUTPUTS_90m/baseline2/plots/'
+path_data= '/Users/vrobledodelgado/Library/CloudStorage/OneDrive-UniversityofIowa/PhD/SERVIR_PROJECT/GHANA/Calibration/OUTPUTS_90m/baseline2/'
 path_obs = '/Users/vrobledodelgado/Documents/GitHub/FFWestAfrica/DATA/GHANA/DATA/consolidated/'
 
 file_list = glob.glob(path_data + "*.csv")
@@ -104,9 +106,25 @@ file_list_obs = glob.glob(path_obs + "*.csv")
 print((file_list_obs))
 prefix_obs = path_obs
 
-for file, file_obs in zip(file_list,file_list_obs):
-    print('Opening: ' + file[len(prefix):])
-    Q_daily_df, Q_obs = read_and_convert(file, file_obs, prefix)
-    rmse, bias, nse = calcplotsular_metricas_error(Q_daily_df['Discharge(m^3 s^-1)'], Q_obs['discharge'])
-    plotting(Q_daily_df,Q_obs,nse,bias,rmse)
+# %%
+# Main code block
+for file in file_list:
+    # Extract the number from the current file
+    num_file = file[len(prefix)+3:-len('.crest.csv')]
+    # Look for a matching file in file_list_obs
+    matching_file_obs = None
+    for file_obs in file_list_obs:
+        num_file_obs = file_obs[len(prefix_obs):-len('_daily_Q.csv')]
+        if num_file == num_file_obs:
+            print(num_file,num_file_obs)
+            matching_file_obs = file_obs
+            break
+    # If a matching file is found, proceed with the rest of the code
+    if matching_file_obs:
+        print('Opening: ' + file[len(prefix):]+ ' and '+ matching_file_obs[len(prefix_obs):])
+        Q_daily_df, Q_obs = read_and_convert(file, matching_file_obs, prefix)
+        rmse, bias, nse = calcular_metricas_error(Q_daily_df['Discharge(m^3 s^-1)'], Q_obs['discharge'])
+        plotting(Q_daily_df, Q_obs, nse, bias, rmse)
+    else:
+        print(f"No matching observation file found for {file}")
 # %%
