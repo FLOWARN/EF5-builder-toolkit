@@ -1,4 +1,4 @@
-# Flash Flood Forecasting System for West Africa
+# Flash Flood Forecasting System for West Africa and Ghana
 
 This repository contains code, documentation, data, and results from the research work done for NASA's SERVIR-West Africa project on developing a flash flood forecasting system in the West Africa domain (WA) (1km resolution) and Ghana domain (GH) (90m resolution).
 
