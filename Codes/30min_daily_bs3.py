@@ -15,6 +15,7 @@ import glob
 import time
 from matplotlib.dates import DateFormatter, AutoDateLocator
 import os
+from matplotlib.ticker import MaxNLocator
 
 def read_and_convert(dataframe_gauge,file_obs,prefix):
     # Lee el archivo CSV
@@ -85,10 +86,11 @@ def plotting(Q_daily_df, Q_obs, nse, bias, rmse):
     ax1.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
     ax1.tick_params(axis='x',labelsize=16,rotation=30)
     ax1.grid(True, which='major', linestyle='--', linewidth=0.5)
+    ax1.set_ylim(0,Q_daily_df['Discharge(m^3 s^-1)'].max()+50)
     
     # Create a secondary y-axis
     ax2 = ax1.twinx()
-    ax2.plot(Q_daily_df.index,Q_daily_df['Precip (mm d^-1)'],color='rebeccapurple',linewidth=2, alpha = 0.7)
+    ax2.plot(Q_daily_df.index,Q_daily_df['Precip (mm d^-1)'],color='rebeccapurple',linewidth=2, alpha = 0.9)
     ax2.set_ylim(0,Q_daily_df['Precip (mm d^-1)'].max()+50)
     ax2.invert_yaxis()
     ax2.set_ylabel('Precip (mm d^-1)', color='rebeccapurple',fontsize=20)  # we already handled the x-label with ax1
@@ -107,13 +109,8 @@ def plotting(Q_daily_df, Q_obs, nse, bias, rmse):
     plt.text(0.02, 0.95, f'RMSE: {rmse:.2f}\nBias: {bias:.2f}\nNSE: {nse:.2f}', transform=ax.transAxes, fontsize=16,
              verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.9))
     plt.legend()
-    
-    #plt.xticks(rotation=30, fontsize=16)
-
     plt.title('GAUGE= '+file[len(prefix)+3:-10])
-    plt.grid(visible=True, which='major')
-    ax.xaxis.set_major_locator(AutoDateLocator(minticks=10, maxticks=20))
-    ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
+    
     #plt.show()
     plt.savefig(path_data+"plots/"+file[len(prefix)+3:-10]+'.png',bbox_inches='tight')
 #%%   
@@ -127,10 +124,7 @@ prefix_obs = path_obs
 #%%
 for file_obs in file_list_obs:
     # Extract the number from the current file
-    #num_file = file_obs[len(prefix_obs):-len('_daily_Q.csv')].strip()
-    #%%
-    file_obs = file_list_obs[0]
-    num_file = '9000008'
+    num_file = file_obs[len(prefix_obs):-len('_daily_Q.csv')].strip()
     gauge = []
     print('looking for files in gauge: ',num_file)
     for y in range(2002,2023):
@@ -166,9 +160,6 @@ for file_obs in file_list_obs:
         final_data = Q_obs.index[-1]
         Q_daily_df_2 = Q_daily_df.loc[(Q_daily_df.index >= initial_data) & (Q_daily_df.index <= final_data)]
         rmse, bias, nse = calcular_metricas_error(Q_daily_df_2['Discharge(m^3 s^-1)'], Q_obs['discharge'])
-        #%%
         plotting(Q_daily_df_2, Q_obs, nse, bias, rmse)
-
-
 
 # %%
