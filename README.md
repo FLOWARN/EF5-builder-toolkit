@@ -9,7 +9,6 @@ This repository is split into 3 directories: DATA, EF5, CODES.
     **GIS:** GIS files used to configure the study region, also flash flood event locations.
     **DATA_obs:** Observational streamflow data from different entities
     **Model_config:** Datasets needed to run Ghana high resolution model, such as basic grid files, parameters and forcings. This folder also contains instructions and inputs to calculate CREST and KW parameters.
-    **Basin-aggregation:** Instructions and files to perform the basin aggregation. 
 
 **2. EF5_results:** Contains control files used for the WA and GH domain, as well as the simulation outputs. 
 
