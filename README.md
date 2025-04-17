@@ -5,8 +5,8 @@ This repository contains code, documentation, data, and results from the researc
 This repository is split into 3 directories: DATA, EF5, CODES.
 
 **1. Data**: Contains all data used in the research for both WA domain and GH domain, including a .xlsx file with observational station details is provided for both WA and GH domain.
-**1.1. Subfolders for Ghana:**
 
+**1.1. Subfolders for Ghana:**
     **GIS:** GIS files used to configure the study region, also flash flood event locations.
     **DATA_obs:** Observational streamflow data from different entities
     **Model_config:** Datasets needed to run Ghana high resolution model, such as basic grid files, parameters and forcings. This folder also contains instructions and inputs to calculate CREST and KW parameters.
