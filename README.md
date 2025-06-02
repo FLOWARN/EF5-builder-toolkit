@@ -2,7 +2,7 @@
 
 This repository contains code, documentation, data, and results from the research work done for NASA's SERVIR-West Africa project on developing a flash flood forecasting system in the West Africa domain (WA) (1km resolution) and Ghana domain (GH) (90m resolution).
 
-This repository is split into 3 directories: DATA, EF5, CODES.
+This repository is splitted into 3 directories: DATA, EF5, CODES.
 
 **1. Data**: Contains all data used in the research for both WA domain and GH domain, including a .xlsx file with observational station details is provided for both WA and GH domain.
 
