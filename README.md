@@ -1,26 +1,144 @@
-# Flash Flood Forecasting System for West Africa and Ghana
+# Building an EF5 Model: A Step-by-Step Guide
 
-This repository contains code, documentation, data, and results from the research work done for NASA's SERVIR-West Africa project on developing a flash flood forecasting system in the West Africa domain (WA) (1km resolution) and Ghana domain (GH) (90m resolution).
+A complete guide to constructing and implementing an EF5 model from scratch using Python and Jupyter Notebooks.
 
-This repository is splitted into 3 directories: DATA, EF5, CODES.
+## Overview
+This repository provides a step-by-step guide for setting up an EF5 model configuration. The included code and resources are designed to help users build a functional model for their own watershed. The methodology outlined here has been successfully used to create EF5 models at various resolutions for regions like Ghana, West Africa, and Iowa, USA.
 
-**1. Data**: Contains all data used in the research for both WA domain and GH domain, including a .xlsx file with observational station details is provided for both WA and GH domain.
+The core of the EF5 model is the **control file**, which defines all the input data and parameters. This guide is structured around filling out the necessary blocks within this control file.
 
-**1.1. Subfolders for Ghana:**
+For a comprehensive understanding of EF5, please refer to the official documentation: [EF5 User Manual](https://ef5docs.readthedocs.io/).
 
-- **GIS**: GIS files used to configure the study region, also flash flood event locations.
-- **DATA_obs**: Observational streamflow data from different entities.
-- **Model_config**: Datasets needed to run Ghana high resolution model, such as basic grid files, parameters, and forcings. This folder also contains instructions and inputs to calculate CREST and KW parameters.
+For any questions, contact Vanessa Robledo (vanessa-robledodelgado@uiowa.edu).
+
+---
+
+## Prerequisites
+
+You have two options for running the code in this guide:
+
+#### 1. Google Colaboratory (Recommended)
+The easiest way to get started is with Google Colab, as all notebooks are adapted to run in that environment.
+- **Link:** [https://colab.research.google.com/](https://colab.research.google.com/)
+
+#### 2. Local Conda Environment
+If you prefer to work on your local machine, we recommend creating a new Conda environment to avoid package conflicts.
+
+1.  **Create the environment from the provided file:**
+    The `environment.yml` file is located in the `/prerequisites` folder. Run the following command in your terminal:
+    ```sh
+    conda env create -f prerequisites/environment.yml
+    ```
+    *(This process may take several minutes.)*
+
+2.  **Activate the new environment:**
+    ```sh
+    conda activate ef5_env
+    ```
+
+---
+
+## 📁 Project Structure
+
+All necessary files are organized into the following folders:
+
+-   **/Codes:** Contains all Jupyter Notebooks for each step.
+-   **/prerequisites:** Includes the Conda environment file.
+
+---
+
+## Step-by-Step Instructions
+
+The following steps will walk you through generating the required input files for the EF5 model, using the control file blocks as our guide.
 
 
-**2. EF5_results:** Contains control files used for the WA and GH domain, as well as the simulation outputs. 
+### Step 1: Getting the basic files
 
-**3. Codes:** Contains python codes usefull for creating basic grid files, processing parameters layers, posprocessing EF5 outputs, download IMERG v07 files.
-- 1_GettingBasicFiles.ipynb: Download and clip hydrosheds data to create the basic files (FDIR, FAC, DEM) using a shapefile of the study region.
-- 1b_CreateBasicGrids.ipynb: Create the basic files (FDIR, FAC, DEM) using Pysheds library.
-- 2_Get_precipitation_files.ipynb: Download IMERG precipitation files.
-- 4_Crest_parameters_estimation.ipynb: Estimate Crest parameters for the study region.
-- 4b_IM_layer_processing.ipynb: Process the impervious layer using the global man-made impervious surfaces (GMIS) from NASA.
-- 5_Visualize_outputs.ipynb: Create nice plots usign EF5 outputs and observations.
-  
-For any questions, contact Vanessa Robledo at vanessa-robledodelgado@uiowa.edu
+This first step creates the fundamental raster files: the Digital Elevation Model (DEM), Flow Direction Model (DDM), and Flow Accumulation Model (FAM).
+
+**EF5 Control File Block:**
+```
+[Basic]
+DEM=data/basic/dem.tif
+DDM=data/basic/ddm.tif
+FAM=data/basic/fam.tif
+PROJ=geographic
+ESRIDDM=true
+SelfFAM=false
+```
+First step is to get the basic grid files (DEM, flow direction, flow accumulation). Users have several options such as QGIS or ArcGIS based methodologies. However, in this tutoral you have two options depending on your available data:
+
+* **Option A: Use HydroSHEDS Data**
+    If you want to create a model based on the readily available HydroSHEDS dataset, use the following notebook:
+    - **Notebook:** [`/Codes/1_GettingBasicFiles.ipynb`](/Codes/1_GettingBasicFiles.ipynb)
+
+* **Option B: Use a Custom DEM**
+    If you have your own high-resolution DEM, use this notebook to derive the DDM and FAM grids:
+    - **Notebook:** [`/Codes/1b_CreateBasicGrids.ipynb`](/Codes/1b_CreateBasicGrids.ipynb)
+
+
+**Result:** After running the appropriate notebook, ensure your three output files (`dem.tif`, `ddm.tif`, `fam.tif`) are saved in the `/data/basic/` directory.
+
+### Step 2: Prepare Precipitation Forcing Data
+
+Next, you will download and format the precipitation data. This guide uses IMERG v07 for its excellent spatial and temporal resolution.
+
+**EF5 Control File Block:**
+```
+[PrecipForcing IMERG]
+TYPE=TIF
+UNIT=mm/h
+FREQ=30u
+LOC=/data/precip/
+NAME=imerg.YYYYMMDDHHUU.tif
+```
+In this example, we are using IMERG v07 files due to its high temporal and spatial coverage. Follow the instructions in the notebook below to process the precipitation files.
+- **Notebook:** [`/Codes/2_Get_precipitation_files.ipynb`](/Codes/2_Get_precipitation_files.ipynb)
+
+**Result:** Place all generated precipitation `.tif` files into the `/data/precip/` directory.
+
+### Step 3: Prepare Potential Evapotranspiration (PET) Data
+
+The final forcing dataset required is Potential Evapotranspiration.
+
+**EF5 Control File Block:**
+```
+[PETForcing CLIMO]
+TYPE=TIF
+UNIT=mm/d
+FREQ=1m
+LOC=/data/pet/
+NAME=PET.MM.tif
+```
+
+You can obtain PET data from several sources:
+
+* **Global Dataset:** The University of Oklahoma provides global PET datasets compatible with EF5. You can find them in the [EF5-Global-Parameters](https://github.com/HyDROSLab/EF5-Global-Parameters/tree/main/FAO_PET) repository.
+* **Regional Dataset (West Africa):** If you are building the West Africa or Ghana 1km model, pre-clipped PET files are available [here](https://github.com/RobledoVD/WAEF5-dockerized/tree/main/data/pet).
+
+**Result:** Place the monthly PET `.tif` files (e.g., `PET.01.tif`, `PET.02.tif`, etc.) into the `/data/pet/` directory.
+
+### Step 4: In process....
+
+
+
+
+
+
+
+```
+[Task BASINAVGING] 
+STYLE=BASIN_AVG 
+MODEL=crest 
+ROUTING=KW 
+BASIN=0 
+PRECIP=IMERG 
+PET=CLIM 
+OUTPUT=/basin-aggregation/ 
+defaultparamsgauge=0 
+PARAM_SET=MyCRESTPAR 
+ROUTING_PARAM_Set=MyKWPAR 
+TIMESTEP=30u 
+TIME_BEGIN=202010100830 
+TIME_END=202010110400 
+```
