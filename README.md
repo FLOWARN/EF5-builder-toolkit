@@ -38,12 +38,12 @@ If you prefer to work on your local machine, we recommend creating a new Conda e
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 All necessary files are organized into the following folders:
 
 -   **/Codes:** Contains all Jupyter Notebooks for each step.
--   **/prerequisites:** Includes the Conda environment file.
+-   **/Prerequisites:** Includes the Conda environment file.
 
 ---
 
