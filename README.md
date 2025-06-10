@@ -79,6 +79,8 @@ First step is to get the basic grid files (DEM, flow direction, flow accumulatio
 
 **Result:** After running the appropriate notebook, ensure your three output files (`dem.tif`, `ddm.tif`, `fam.tif`) are saved in the `/data/basic/` directory.
 
+---
+
 ### Step 2: Prepare Precipitation Forcing Data
 
 Next, you will download and format the precipitation data. This guide uses IMERG v07 for its excellent spatial and temporal resolution.
@@ -96,6 +98,8 @@ In this example, we are using IMERG v07 files due to its high temporal and spati
 - **Notebook:** [`/Codes/2_Get_precipitation_files.ipynb`](/Codes/2_Get_precipitation_files.ipynb)
 
 **Result:** Place all generated precipitation `.tif` files into the `/data/precip/` directory.
+
+---
 
 ### Step 3: Prepare Potential Evapotranspiration (PET) Data
 
@@ -118,6 +122,7 @@ You can obtain PET data from several sources:
 
 **Result:** Place the monthly PET `.tif` files (e.g., `PET.01.tif`, `PET.02.tif`, etc.) into the `/data/pet/` directory.
 
+---
 
 ### Step 4: Preparing Grids for a Distributed Model
 
@@ -167,6 +172,8 @@ Example:
 ```
 
 Use the C-Shell script for all the inputs listed above.
+
+---
 
 ### Step 5: Automatically defining all outlets locations with `CLIP_GAUGE`
 
@@ -227,6 +234,8 @@ Now, you will transfer this configuration into the main control file that you wi
 - Paste the copied text into the file. The correct location is between the last forcing block (e.g., [PETForcing CLIMO]) and the first parameter block (e.g., [CrestParamSet]).
 - This process defines a single, comprehensive basin named [Basin 0] that includes all the generated gauges. If any other blocks in your control file need to reference a basin, ensure they are set to use 0.
 
+---
+
 ### Step 6: Calculate Basin-Integrated Variables with `BASIN_AVG`
 
 To generate certain parameters, like those for Hydraulic Geometry, you first need to calculate basin-wide average values from your gridded data (e.g., mean precipitation). The `BASIN_AVG` task in EF5 is designed for this purpose.
@@ -274,6 +283,8 @@ The process will finish by printing an error message to the screen. **This is no
 
 5. Verify the Output:  Navigate to the output folder you created (e.g., basin_integration/). You will now find new text files containing the results of the calculation, such as `mean_temp_basin_avg.txt` and `mean_precip_basin_avg.txt`. These files contain the basin-integrated values needed for subsequent steps.
 
+---
+
 ### Step 7: Create the CREST parameters
 
 At this point, you should have the soil texture rasters clipped and regridded for your area domain (see Step 4 in this guide). Place them into a folder `CREST_input`. The expected files in this folder are:
@@ -320,6 +331,8 @@ iwu=0
 
 You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necesarily to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://www.arcgis.com/home/item.html?id=c7b1f81397ca44f897448f39c5b9c9aa). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
 - **Notebook:** [`/Codes/4b_IM_layer_processing.ipynb`](/Codes/4b_IM_layer_processing.ipynb)
+
+---
 
 ### Step 8: Create the KW parameters (in process)
 
