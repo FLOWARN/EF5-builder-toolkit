@@ -118,13 +118,129 @@ You can obtain PET data from several sources:
 
 **Result:** Place the monthly PET `.tif` files (e.g., `PET.01.tif`, `PET.02.tif`, etc.) into the `/data/pet/` directory.
 
-### Step 4: In process....
 
+### Step 4: Preparing Grids for a Distributed Model
 
+To create a distributed model using EF5 tasks like `CLIP_GAUGE` and `BASIN_AVG`, all input grids must be perfectly aligned. This means they must share the exact same spatial domain (extent), pixel resolution, and coordinate system. 
 
+#### Inputs needed
 
+* **For Water Balance (CREST)**
 
+1. Soil texture rasters: Percent Sand, Percent Clay, and Percent Silt
 
+2. Depth to bedrock raster in meters
+
+* **Flow Routing (KinematicWave)**
+
+1. DEM and their flow grid derivatives: DEM (dem) file, Flow Accumulation (facc) file, and Flow Direction (fdir) file
+
+2. Hydroclimatological grids: Mean Temperature (Celsius) and Mean Annual Total Precipitation (mm)
+
+3. Manning's roughness coefficient
+
+#### Preparing domain grids
+
+The **Digital Elevation Model (DEM)** serves as the master template for the entire model domain. All other grids must conform to it.
+
+> **:warning: Critical Note on Foundational Grids**
+>
+> It is incorrect to directly resample or reproject existing Flow Accumulation (`facc`) or Flow Direction (`fdir`) grids. If your DEM needs modification (e.g., re-projecting or resampling), you must use the **final, correct DEM** to regenerate the `facc` and `fdir` grids from scratch.
+
+The hydroclimatological grids do not have to have the same domain grid, but do need to have the same coordinate system as dem and its derivatives. If this is not the case, use a GIS-based tool to re-project grids to match the same coordinate system as dem. An example of this kind of tool is GDAL's program gdalwarp. If all grids have the same coordinate system, all is needed is to resample and subset to match dem's pixel resolution and domain box. 
+
+To help with this, a C-Shell script is included in this folder "resample_and_subset.csh". The following illustrates the usage:
+
+```sh
+./resample_and_subset.csh <input_file.tif> <output_file.tif> <template.tif>
+```
+
+**input_file.tif:** The grid file that needs to be processed (e.g., climatological_temperature.tif).
+**output_file.tif:** The desired name for the processed, aligned file (e.g., mean_temp.tif).
+**template.tif:** The master grid to use as a template for pixel resolution and domain coordinates (this should be your final dem.tif).
+
+Example:
+
+```sh
+./resample_and_subset.csh climatological_temperature.tif mean_temp.tif dem.tif
+```
+
+Use the C-Shell script for all the inputs listed above.
+
+### Step 5: Automatically defining all outlets locations with `CLIP_GAUGE`
+
+Forcing EF5 to model every pixel within a domain can be a tedious process if done manually. Instead of creating hundreds of `[Gauge]` blocks by hand, you can use a specific EF5 run mode to automatically identify all outlets and generate the necessary configuration.
+
+This process uses the `CLIP_GAUGE` style. Here is the step-by-step guide:
+
+1. **Configure the CLIP_GAUGE Control File**
+You will need to run EF5 with a temporary control file specifically for this task.
+
+- A sample file is provided in this folder:  [`/Resources/ef5_clip_gauge_sample.txt`]. Use it as your starting point.
+- In the [Task] block, ensure the run style is set to CLIP_GAUGE.
+
+```
+[Task GAUGECLIP]
+STYLE=CLIP_GAUGE
+MODEL=crest
+ROUTING=KW
+BASIN=0
+PRECIP=IMERG
+PET=CLIMO
+OUTPUT=/outputs/ 
+PARAM_SET=CREST
+ROUTING_PARAM_Set=KinematicWave
+TIMESTEP=30u
+TIME_BEGIN=202406210000
+TIME_END=202406210400
+```
+
+> **:Important:** The other blocks in this sample file (e.g., paths to forcing data) must still contain valid entries. EF5 may check for the existence of these files even though they are not used in the CLIP_GAUGE operation.
+
+2. **Run EF5 and Check the Outputs:**
+
+Run EF5 using the control file configured in the previous step. When the process is complete, two new files will be generated:
+
+- `maskgrid.tif`: This is a raster file you can open in QGIS or another GIS software. Use it to visually verify that the drainage basins within your domain have been correctly identified.
+- `basin_new.txt`: This text file contains the auto-generated [Gauge] and [Basin] blocks for your model.
+
+The contents of basin_new.txt will look something like this:
+
+```
+[Gauge 0] cellx=28 celly=6 outputts=false #Num Cells = 360.000000
+[Gauge 1] cellx=28 celly=4 outputts=false #Num Cells = 148.000000
+[Gauge 2] cellx=10 celly=1 outputts=false #Num Cells = 44.000000
+...
+...
+[Gauge 45] cellx=5 celly=0 outputts=false #Num Cells = 0.000000
+[Basin 0]
+gauge=0 gauge=1 gauge=2 gauge=3 gauge=4 gauge=5 gauge=6 gauge=7 gauge=8 gauge=9 gauge=10 gauge=11 gauge=12 gauge=13 gauge=14 gauge=15 gauge=16 gauge=17 gauge=18 gauge=19 gauge=20 gauge=21 gauge=22 gauge=23 gauge=24 gauge=25 gauge=26 gauge=27 gauge=28 gauge=29 gauge=30 gauge=31 gauge=32 gauge=33 gauge=34 gauge=35 gauge=36 gauge=37 gauge=38 gauge=39 gauge=40 gauge=41 gauge=42 gauge=43 gauge=44 gauge=45
+
+```
+3. **Update Your Control File:**
+
+Now, you will transfer this configuration into the main control file that you will use to run actual simulations.
+
+- Open `basin_new.txt` and copy its entire contents.
+- Open your final simulation control file.
+- Paste the copied text into the file. The correct location is between the last forcing block (e.g., [PETForcing CLIMO]) and the first parameter block (e.g., [CrestParamSet]).
+- This process defines a single, comprehensive basin named [Basin 0] that includes all the generated gauges. If any other blocks in your control file need to reference a basin, ensure they are set to use 0.
+
+### Step 6: Calculate Basin-Integrated Variables with `BASIN_AVG`
+
+To generate certain parameters, like those for Hydraulic Geometry, you first need to calculate basin-wide average values from your gridded data (e.g., mean precipitation). The `BASIN_AVG` task in EF5 is designed for this purpose.
+
+Follow these steps to perform the basin integration:
+
+1. Create a new folder for this operation (e.g., basin_integration/).
+2. Copy the grid files that need to be integrated (`mean_temp.tif` and `mean_precip.tif`) into this new `basin_integration/` folder.
+3. Modify your main simulation control file to perform this specific task.
+
+> In the `[Task]` block, set the `STYLE` to `BASIN_AVG`.
+> Point the `OUTPUT` variable to the directory you just created.
+> Ensure the other settings match your project's configuration.
+
+The new task block in your control file using basin average function of EF5 should looks like this:
 
 ```
 [Task BASINAVGING] 
@@ -136,9 +252,25 @@ PRECIP=IMERG
 PET=CLIM 
 OUTPUT=/basin-aggregation/ 
 defaultparamsgauge=0 
-PARAM_SET=MyCRESTPAR 
-ROUTING_PARAM_Set=MyKWPAR 
+PARAM_SET=CREST 
+ROUTING_PARAM_Set=KinematicWave 
 TIMESTEP=30u 
 TIME_BEGIN=202010100830 
 TIME_END=202010110400 
 ```
+
+> **Note:** Ensure that the names for BASIN, PET, PARAM_SET, etc., are consistent with the rest of your control file.
+
+4. Save the modified control file and run EF5 using this control file. The model will print status updates to the screen. The process should only take a few seconds, but may be longer for very high-resolution domains.
+
+The process will finish by printing an error message to the screen. **This is normal for this specific task.**
+
+> **:warning: Expected Error**
+
+> `ERROR:src/ExecutionController.cpp(94): Unimplemented simulation run style "7"`
+
+> You can safely ignore this error. It indicates that the BASIN_AVG operation completed successfully.
+
+5. Verify the Output:  Navigate to the output folder you created (e.g., basin_integration/). You will now find new text files containing the results of the calculation, such as `mean_temp_basin_avg.txt` and `mean_precip_basin_avg.txt`. These files contain the basin-integrated values needed for subsequent steps.
+
+

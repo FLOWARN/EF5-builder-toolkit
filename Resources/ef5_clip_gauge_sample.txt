@@ -1,0 +1,68 @@
+[Basic] 
+DEM=/data/basic/DEM.tif
+DDM=/data/basic/FDIR.tif
+FAM=/data/basic/FAC.tif
+PROJ=geographic
+ESRIDDM=true SelfFAM=false
+
+[PrecipForcing IMERG]
+TYPE=TIF
+UNIT=mm/h
+FREQ=30u
+LOC=/data/precip/
+NAME=imerg.YYYYMMDDHHUU.tif
+
+
+[PETForcing CLIMO]
+TYPE=TIF
+UNIT=mm/d
+FREQ=1m
+LOC=/data/pet/
+NAME=PET.MM.tif
+
+##-----Gauge Block----
+
+[gauge 0] lat=39.93 lon=-91.42
+
+[Basin 0]
+gauge=0
+
+##-----Gauge Block----
+
+
+[CrestParamSet CREST]
+gauge=0
+wm=1.0
+b=1.0
+im=0.01
+ke=1.0
+fc=1.0
+iwu=0
+
+[kwparamset KinematicWave]
+gauge=0
+alpha0=1.0
+alpha=1.0
+beta=1.0
+under=0.0001
+leaki=1.0
+th=10.0
+isu=00.0
+
+
+[Task GAUGECLIP]
+STYLE=CLIP_GAUGE
+MODEL=crest
+ROUTING=KW
+BASIN=0
+PRECIP=IMERG
+PET=CLIMO
+OUTPUT=/outputs/ 
+PARAM_SET=CREST
+ROUTING_PARAM_Set=KinematicWave
+TIMESTEP=60u
+TIME_BEGIN=202406210000
+TIME_END=202406210400
+
+[Execute]
+task=GAUGECLIP
