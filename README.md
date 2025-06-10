@@ -113,7 +113,7 @@ NAME=PET.MM.tif
 
 You can obtain PET data from several sources:
 
-* **Global Dataset:** The University of Oklahoma provides global PET datasets compatible with EF5. You can find them in the [EF5-Global-Parameters](https://github.com/HyDROSLab/EF5-Global-Parameters/tree/main/FAO_PET) repository.
+* **Global Dataset:** The University of Oklahoma provides global PET datasets compatible with EF5. You can find them in the [EF5-Global-Parameters](https://github.com/HyDROSLab/EF5-Global-Parameters/tree/main/FAO_PET) repository or if you are interested in U.S. [US-Parameters](https://github.com/HyDROSLab/EF5-US-Parameters)
 * **Regional Dataset (West Africa):** If you are building the West Africa or Ghana 1km model, pre-clipped PET files are available [here](https://github.com/RobledoVD/WAEF5-dockerized/tree/main/data/pet).
 
 **Result:** Place the monthly PET `.tif` files (e.g., `PET.01.tif`, `PET.02.tif`, etc.) into the `/data/pet/` directory.
@@ -321,7 +321,7 @@ iwu=0
 You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necesarily to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://www.arcgis.com/home/item.html?id=c7b1f81397ca44f897448f39c5b9c9aa). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
 - **Notebook:** [`/Codes/4b_IM_layer_processing.ipynb`](/Codes/4b_IM_layer_processing.ipynb)
 
-### Step 8: Create the KW parameters
+### Step 8: Create the KW parameters (in process)
 
 
 
