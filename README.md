@@ -127,17 +127,18 @@ To create a distributed model using EF5 tasks like `CLIP_GAUGE` and `BASIN_AVG`,
 
 * **For Water Balance (CREST)**
 
-1. Soil texture rasters: Percent Sand, Percent Clay, and Percent Silt
+1. Soil texture rasters: Percent Sand, Percent Clay, and Percent Silt.
+> You can access to these files in [soilgrids.org](https://soilgrids.org/) 
 
 2. Depth to bedrock raster in meters
 
 * **Flow Routing (KinematicWave)**
 
-1. DEM and their flow grid derivatives: DEM (dem) file, Flow Accumulation (facc) file, and Flow Direction (fdir) file
+1. DEM and their flow grid derivatives: DEM (dem) file, Flow Accumulation (facc) file, and Flow Direction (fdir) file.
 
-2. Hydroclimatological grids: Mean Temperature (Celsius) and Mean Annual Total Precipitation (mm)
+2. Hydroclimatological grids: Mean Temperature (Celsius) and Mean Annual Total Precipitation (mm).
 
-3. Manning's roughness coefficient
+3. Manning's roughness coefficient.
 
 #### Preparing domain grids
 
@@ -173,7 +174,7 @@ Forcing EF5 to model every pixel within a domain can be a tedious process if don
 
 This process uses the `CLIP_GAUGE` style. Here is the step-by-step guide:
 
-1. **Configure the CLIP_GAUGE Control File**
+1. Configure the CLIP_GAUGE Control File
 You will need to run EF5 with a temporary control file specifically for this task.
 
 - A sample file is provided in this folder:  [`/Resources/ef5_clip_gauge_sample.txt`]. Use it as your starting point.
@@ -188,16 +189,16 @@ BASIN=0
 PRECIP=IMERG
 PET=CLIMO
 OUTPUT=/outputs/ 
-PARAM_SET=CREST
-ROUTING_PARAM_Set=KinematicWave
+PARAM_SET=myCREST
+ROUTING_PARAM_Set=myKinematicWave
 TIMESTEP=30u
 TIME_BEGIN=202406210000
 TIME_END=202406210400
 ```
 
-> **:Important:** The other blocks in this sample file (e.g., paths to forcing data) must still contain valid entries. EF5 may check for the existence of these files even though they are not used in the CLIP_GAUGE operation.
+> **❗Important:** The other blocks in this sample file (e.g., paths to forcing data) must still contain valid entries. EF5 may check for the existence of these files even though they are not used in the CLIP_GAUGE operation.
 
-2. **Run EF5 and Check the Outputs:**
+2. Run EF5 and Check the Outputs:
 
 Run EF5 using the control file configured in the previous step. When the process is complete, two new files will be generated:
 
@@ -217,7 +218,7 @@ The contents of basin_new.txt will look something like this:
 gauge=0 gauge=1 gauge=2 gauge=3 gauge=4 gauge=5 gauge=6 gauge=7 gauge=8 gauge=9 gauge=10 gauge=11 gauge=12 gauge=13 gauge=14 gauge=15 gauge=16 gauge=17 gauge=18 gauge=19 gauge=20 gauge=21 gauge=22 gauge=23 gauge=24 gauge=25 gauge=26 gauge=27 gauge=28 gauge=29 gauge=30 gauge=31 gauge=32 gauge=33 gauge=34 gauge=35 gauge=36 gauge=37 gauge=38 gauge=39 gauge=40 gauge=41 gauge=42 gauge=43 gauge=44 gauge=45
 
 ```
-3. **Update Your Control File:**
+3. Update Your Control File:
 
 Now, you will transfer this configuration into the main control file that you will use to run actual simulations.
 
@@ -233,10 +234,12 @@ To generate certain parameters, like those for Hydraulic Geometry, you first nee
 Follow these steps to perform the basin integration:
 
 1. Create a new folder for this operation (e.g., basin_integration/).
+
 2. Copy the grid files that need to be integrated (`mean_temp.tif` and `mean_precip.tif`) into this new `basin_integration/` folder.
+
 3. Modify your main simulation control file to perform this specific task.
 
-> In the `[Task]` block, set the `STYLE` to `BASIN_AVG`.
+> ❗**Important:** In the `[Task]` block, set the `STYLE` to `BASIN_AVG`.
 > Point the `OUTPUT` variable to the directory you just created.
 > Ensure the other settings match your project's configuration.
 
@@ -252,8 +255,8 @@ PRECIP=IMERG
 PET=CLIM 
 OUTPUT=/basin-aggregation/ 
 defaultparamsgauge=0 
-PARAM_SET=CREST 
-ROUTING_PARAM_Set=KinematicWave 
+PARAM_SET=myCREST 
+ROUTING_PARAM_Set=myKinematicWave 
 TIMESTEP=30u 
 TIME_BEGIN=202010100830 
 TIME_END=202010110400 
@@ -266,11 +269,58 @@ TIME_END=202010110400
 The process will finish by printing an error message to the screen. **This is normal for this specific task.**
 
 > **:warning: Expected Error**
-
 > `ERROR:src/ExecutionController.cpp(94): Unimplemented simulation run style "7"`
-
 > You can safely ignore this error. It indicates that the BASIN_AVG operation completed successfully.
 
 5. Verify the Output:  Navigate to the output folder you created (e.g., basin_integration/). You will now find new text files containing the results of the calculation, such as `mean_temp_basin_avg.txt` and `mean_precip_basin_avg.txt`. These files contain the basin-integrated values needed for subsequent steps.
+
+### Step 7: Create the CREST parameters
+
+At this point, you should have the soil texture rasters clipped and regridded for your area domain (see Step 4 in this guide). Place them into a folder `CREST_input`. The expected files in this folder are:
+
+`BDRICM_M.tif      
+CLYPPT_M_sl3.tif  
+CLYPPT_M_sl6.tif  
+SNDPPT_M_sl2.tif  
+SNDPPT_M_sl5.tif
+CLYPPT_M_sl1.tif  
+CLYPPT_M_sl4.tif  
+CLYPPT_M_sl7.tif  
+SNDPPT_M_sl3.tif  
+SNDPPT_M_sl6.tif
+CLYPPT_M_sl2.tif  
+CLYPPT_M_sl5.tif  
+SNDPPT_M_sl1.tif  
+SNDPPT_M_sl4.tif  
+SNDPPT_M_sl7.tif`
+
+Use the following notebook and follow its instructions:
+- **Notebook:** [`/Codes/4_Crest_parameters_estimation.ipynb`](/Codes/4_Crest_parameters_estimation.ipynb)
+
+The outputs will help you to fill out the next block in the control file:
+
+**EF5 Control File Block:**
+```
+[CrestParamSet MyCREST]
+wm_grid=/data/Parameters/crest_Wm.tif
+im_grid=/data/Parameters/crest_IM.tif
+fc_grid=/data/Parameters/crest_Fc_Ksat.tif
+b_grid=/data/Parameters/crest_b.tif
+
+gauge=6607500
+wm=1.0
+b=1.0
+im=0.01
+ke=1.0
+fc=1.0
+iwu=0
+```
+
+❗**Impervious Layer**
+You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necesarily to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://www.arcgis.com/home/item.html?id=c7b1f81397ca44f897448f39c5b9c9aa). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
+- **Notebook:** [`/Codes/4b_IM_layer_processing.ipynb`](/Codes/4b_IM_layer_processing.ipynb)
+
+### Step 8: Create the KW parameters
+
 
 
