@@ -262,7 +262,7 @@ ROUTING=KW
 BASIN=0 
 PRECIP=IMERG 
 PET=CLIM 
-OUTPUT=/basin-aggregation/ 
+OUTPUT=/basin_integration/ 
 defaultparamsgauge=0 
 PARAM_SET=myCREST 
 ROUTING_PARAM_Set=myKinematicWave 
@@ -334,7 +334,46 @@ You should have noticed that there is not `crest_IM.tif` file in the outputs fol
 
 ---
 
-### Step 8: Create the KW parameters (in process)
+### Step 8: Create the Kinematic Wave (KW) Parameters
+
+The final step is to compute the routing parameters required for the Kinematic Wave model. To do this, you must prepare a set of input grids. Place the following files into the folder: `/codes/KW_parameters/inputs_grids/`
+
+Required files:
+
+`basin.area.tif
+dem.tif
+fam.tif
+manning_n.tif
+mean_precip.avg.tif
+mean_temp.avg.tif
+relief.ratio.tif`
+
+>❗**Important:**
+> Ensure the filenames match exactly. EF5 may generate average grid files with names like mean_precip.tif.avg.tif. If this happens, rename the files accordingly so they match the expected input format.
+
+Open and follow the instructions in the following Jupyter notebook to compute the KW parameters:
+
+- **Notebook:** [`/Codes/5_KM_parameters/5_Kinematic_Wave_Parameter_Estimation.ipynb`](/Codes/5_KM_parameters/5_Kinematic_Wave_Parameter_Estimation.ipynb)
+
+The outputs will help you to fill out the next block in the control file:
+
+**EF5 Control File Block:**
+```
+[kwparamset MyKW]
+alpha_grid=parameters/alpha_kw.tif
+beta_grid=parameters/beta_kw.tif
+alpha0_grid=parameters/alpha0_kw.tif
+under_grid=parameters/crest_Fc_Ksat.tif
+gauge=0
+alpha=1.0
+alpha0=1.0
+beta=0.6
+under=0.001
+leaki=0.03
+th=12.0
+isu=0.0
+```
+
 
 
 
