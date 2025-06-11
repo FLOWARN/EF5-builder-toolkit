@@ -373,7 +373,8 @@ leaki=0.03
 th=12.0
 isu=0.0
 ```
-
+# Cite this package as
+Robledo, V., Vergara, H., Henao, S., (2025). A Complete Guide to Constructing and Implementing an EF5 Model from Scratch using Python and Jupyter Notebooks. (v1.0). https://doi.org/10.5281/zenodo.15644400
 
 
 
