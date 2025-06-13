@@ -9,7 +9,7 @@ The core of the EF5 model is the **control file**, which defines all the input d
 
 For a comprehensive understanding of EF5, please refer to the official documentation: [EF5 User Manual](https://ef5docs.readthedocs.io/).
 
-For any questions, contact Vanessa Robledo (vanessa-robledodelgado@uiowa.edu).
+For any questions, contact Vanessa Robledo (vanessa-robledodelgado@uiowa.edu) or the [AHWA Laboratory](https://ahwa.lab.uiowa.edu) Development team at [engr-ahwa-lab@uiowa.edu](mailto:engr-ahwa-lab@uiowa.edu).
 
 ---
 
