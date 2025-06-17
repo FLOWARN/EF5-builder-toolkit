@@ -54,7 +54,7 @@ The following steps will walk you through generating the required input files fo
 
 ### Step 1: Getting the basic files
 
-This first step creates the fundamental raster files: the Digital Elevation Model (DEM), Flow Direction Model (DDM), and Flow Accumulation Model (FAM).
+This first step creates the basic grid files that EF5 employs to define the computational mesh: the Digital Elevation Model (DEM), Flow Direction Model (DDM), and Flow Accumulation Model (FAM).
 
 **EF5 Control File Block:**
 ```
@@ -66,7 +66,7 @@ PROJ=geographic
 ESRIDDM=true
 SelfFAM=false
 ```
-First step is to get the basic grid files (DEM, flow direction, flow accumulation). Users have several options such as QGIS or ArcGIS based methodologies. However, in this tutoral you have two options depending on your available data:
+Users have several options such as QGIS or ArcGIS based methodologies. However, in this tutorial you have two options depending on your available data:
 
 * **Option A: Use HydroSHEDS Data**
     If you want to create a model based on the readily available HydroSHEDS dataset, use the following notebook:
@@ -94,7 +94,7 @@ FREQ=30u
 LOC=/data/precip/
 NAME=imerg.YYYYMMDDHHUU.tif
 ```
-In this example, we are using IMERG v07 files due to its high temporal and spatial coverage. Follow the instructions in the notebook below to process the precipitation files.
+Follow the instructions in the notebook below to process the precipitation files.
 - **Notebook:** [`/Codes/2_Get_precipitation_files.ipynb`](/Codes/2_Get_precipitation_files.ipynb)
 
 **Result:** Place all generated precipitation `.tif` files into the `/data/precip/` directory.
@@ -117,7 +117,7 @@ NAME=PET.MM.tif
 
 You can obtain PET data from several sources:
 
-* **Global Dataset:** The University of Oklahoma provides global PET datasets compatible with EF5. You can find them in the [EF5-Global-Parameters](https://github.com/HyDROSLab/EF5-Global-Parameters/tree/main/FAO_PET) repository or if you are interested in U.S. [US-Parameters](https://github.com/HyDROSLab/EF5-US-Parameters)
+* **Global Dataset:** The University of Oklahoma hosts global PET datasets compatible with EF5. You can find them in the [EF5-Global-Parameters](https://github.com/HyDROSLab/EF5-Global-Parameters/tree/main/FAO_PET) repository or if you are interested in U.S. [US-Parameters](https://github.com/HyDROSLab/EF5-US-Parameters)
 * **Regional Dataset (West Africa):** If you are building the West Africa or Ghana 1km model, pre-clipped PET files are available [here](https://github.com/RobledoVD/WAEF5-dockerized/tree/main/data/pet).
 
 **Result:** Place the monthly PET `.tif` files (e.g., `PET.01.tif`, `PET.02.tif`, etc.) into the `/data/pet/` directory.
@@ -149,9 +149,9 @@ To create a distributed model using EF5 tasks like `CLIP_GAUGE` and `BASIN_AVG`,
 
 The **Digital Elevation Model (DEM)** serves as the master template for the entire model domain. All other grids must conform to it.
 
-> **:warning: Critical Note on Foundational Grids**
+> **:warning: Critical Note on Basic Grids**
 >
-> It is incorrect to directly resample or reproject existing Flow Accumulation (`facc`) or Flow Direction (`fdir`) grids. If your DEM needs modification (e.g., re-projecting or resampling), you must use the **final, correct DEM** to regenerate the `facc` and `fdir` grids from scratch.
+> It is incorrect to directly resample or reproject existing Flow Accumulation (`facc`) or Flow Direction (`fdir`) grids. If your DEM needs modification (e.g., re-projecting or resampling), you must use the **final, correct DEM** to regenerate the `facc` and `fdir` grids from scratch (Step 1 of this tutorial).
 
 The hydroclimatological grids do not have to have the same domain grid, but do need to have the same coordinate system as dem and its derivatives. If this is not the case, use a GIS-based tool to re-project grids to match the same coordinate system as dem. An example of this kind of tool is GDAL's program gdalwarp. If all grids have the same coordinate system, all is needed is to resample and subset to match dem's pixel resolution and domain box. 
 
@@ -238,7 +238,7 @@ Now, you will transfer this configuration into the main control file that you wi
 
 ### Step 6: Calculate Basin-Integrated Variables with `BASIN_AVG`
 
-To generate certain parameters, like those for Hydraulic Geometry, you first need to calculate basin-wide average values from your gridded data (e.g., mean precipitation). The `BASIN_AVG` task in EF5 is designed for this purpose.
+To generate certain parameters, like those for the kinematic wave routing model, you first need to calculate basin-wide average values from your gridded data (e.g., mean precipitation). The `BASIN_AVG` task in EF5 is designed for this purpose.
 
 Follow these steps to perform the basin integration:
 
@@ -281,7 +281,7 @@ The process will finish by printing an error message to the screen. **This is no
 > `ERROR:src/ExecutionController.cpp(94): Unimplemented simulation run style "7"`
 > You can safely ignore this error. It indicates that the BASIN_AVG operation completed successfully.
 
-5. Verify the Output:  Navigate to the output folder you created (e.g., basin_integration/). You will now find new text files containing the results of the calculation, such as `mean_temp_basin_avg.txt` and `mean_precip_basin_avg.txt`. These files contain the basin-integrated values needed for subsequent steps.
+5. Verify the Output:  Navigate to the output folder you created (e.g., basin_integration/). You will now find new geotiff files containing the results of the calculation, such as `mean_temp_basin_avg.tif` and `mean_precip_basin_avg.tif`. These files contain the basin-integrated values needed for subsequent steps.
 
 ---
 
@@ -329,7 +329,7 @@ iwu=0
 
 ❗**Impervious Layer**
 
-You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necesarily to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://www.arcgis.com/home/item.html?id=c7b1f81397ca44f897448f39c5b9c9aa). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
+You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necessary to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://www.arcgis.com/home/item.html?id=c7b1f81397ca44f897448f39c5b9c9aa). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
 - **Notebook:** [`/Codes/4b_IM_layer_processing.ipynb`](/Codes/4b_IM_layer_processing.ipynb)
 
 ---
