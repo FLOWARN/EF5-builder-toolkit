@@ -329,7 +329,7 @@ iwu=0
 
 ❗**Impervious Layer**
 
-You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necessary to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://www.arcgis.com/home/item.html?id=c7b1f81397ca44f897448f39c5b9c9aa). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
+You should have noticed that there is not `crest_IM.tif` file in the outputs folder. It is not necessary to calculate the impervious layer because there are  multiple satellite products available for this, just make sure the units are in percentage. In this case we use the [Global Man-made Impervious Surface (GMIS) Dataset From Landsat](https://search.earthdata.nasa.gov/search/granules?p=C3550185860-ESDIS&pg[0][v]=f&pg[0][gsk]=-start_date&q=GMIS&tl=1278028800!3!!). Please read the documentation of this product and process it according to that. We include a notebook to help with this process: 
 - **Notebook:** [`/Codes/4b_IM_layer_processing.ipynb`](/Codes/4b_IM_layer_processing.ipynb)
 
 ---
